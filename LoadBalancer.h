@@ -7,6 +7,7 @@
 #include <iostream>
 #include <chrono>
 #include "Webserver.h"
+#include <fstream>
 #include "RequestQueue.h"
 
 using std::cout, std::endl;
@@ -16,6 +17,7 @@ private:
     std::vector<Webserver> webservers;
     RequestQueue requestQueue;
     int clockCycle;
+    std::ofstream logFile;
 
     std::string generateRandomIP() {
         std::random_device rd;
@@ -37,7 +39,7 @@ private:
         for (size_t i = 0; i < webservers.size(); ++i) {
                 if (!webservers[i].isBusy()) {
                     webservers.erase(webservers.begin() + i);
-                    // std::cout << "Removed an idle webserver. Total servers: " << webservers.size() << std::endl;
+                    // cout << "Removed an idle webserver. Total servers: " << webservers.size() << endl;
                     break;
                 }
             }
@@ -54,55 +56,65 @@ private:
         double busyRatio = static_cast<double>(busyServers) / webservers.size();
         int pendingRequests = requestQueue.size();
 
-        // Adjust the number of servers based on busy ratio and pending requests
         cout << "--- Ensuring balance busyRatio = " << busyRatio << " pending requests = " << pendingRequests << endl;
+        logFile << "--- Ensuring balance busyRatio = " << busyRatio << " pending requests = " << pendingRequests << endl;
 
         if (busyRatio > 0.75 && pendingRequests > webservers.size() * 2) {
-            // Increase the number of servers if more than 75% are busy and pending requests are more than twice the number of servers
             int currSize = webservers.size();
             for (int i = 0; i < currSize * 2; i++) {
                 webservers.emplace_back();
             }
-            std::cout << "--- Added webservers. Total servers: " << webservers.size() << std::endl;
+            cout << "--- Added webservers. Total servers: " << webservers.size() << endl;
+            logFile << "--- Added webservers. Total servers: " << webservers.size() << endl;
+
         } else if (busyRatio < 0.4 && webservers.size() > 1) {
-            // Find an idle server to remove
             int currSize = webservers.size();
             for (int i = 0; i < currSize / 2; i++) {
                 removeIdle();
             }
-            std::cout << "--- Removed webservers. Total servers: " << webservers.size() << std::endl;
-
+            cout << "--- Removed webservers. Total servers: " << webservers.size() << endl;
+            logFile << "--- Removed webservers. Total servers: " << webservers.size() << endl;
         }
     }
 
 public:
     Loadbalancer(int numServers)
-        : webservers(numServers), clockCycle(0) {}
+        : webservers(numServers), clockCycle(0), logFile("log.txt") {}
+
+    ~Loadbalancer() {
+        if (logFile.is_open()) {
+            logFile.close();
+        }
+    }
 
     void generateInitialRequests(int numRequests) {
         for (int i = 0; i < numRequests; ++i) {
             requestQueue.addRequest(Request(generateRandomIP(), generateRandomIP(), generateRandomTime()));
         }
         cout << numRequests << " initial requests added to the initial queue" << endl;
+        logFile << numRequests << " initial requests added to the initial queue" << endl;
+
     }
 
-void run(int duration) {
-    auto start = std::chrono::steady_clock::now();
-    std::cout << "Load Balancer has started running" << std::endl;
+void run(int maxClockCycles) {
+    cout << "Load Balancer has started running" << endl;
+    logFile << "Load Balancer has started running" << endl;
 
+
+    auto start = std::chrono::steady_clock::now();
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(1, 100); 
 
-    while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start).count() < duration) {
-        clockCycle++;
-
+    while (clockCycle < maxClockCycles) {
         for (int i = 0; i < webservers.size(); i++) {
+            clockCycle++;
             if (!webservers[i].isBusy() && requestQueue.hasRequest()) {
                 Request next = requestQueue.getNextRequest();
                 webservers[i].assignRequest(next);
-                std::cout << "Request with ipIn: " << next.ipIn << " ipOut: " << next.ipOut << " time: " << next.time
-                          << " has been assigned to webserver " << i << std::endl;
+                cout << "Request with ipIn: " << next.ipIn << " ipOut: " << next.ipOut << " time: " << next.time << " has been assigned to webserver " << i << " at clock cycle " << clockCycle << endl;
+                logFile << "Request with ipIn: " << next.ipIn << " ipOut: " << next.ipOut << " time: " << next.time << " has been assigned to webserver " << i << " at clock cycle " << clockCycle << endl;
+
             }
             webservers[i].process();
         }
@@ -111,21 +123,21 @@ void run(int duration) {
         if (random % 3 == 0) {
             Request randomRequest(generateRandomIP(), generateRandomIP(), generateRandomTime());
             requestQueue.addRequest(randomRequest);
-            std::cout << "Random request with ipIn: " << randomRequest.ipIn << " ipOut: " << randomRequest.ipOut
-                      << " time: " << randomRequest.time << " has been added to the request queue" << std::endl;
+            cout << "Random request with ipIn: " << randomRequest.ipIn << " ipOut: " << randomRequest.ipOut << " time: " << randomRequest.time << " has been added to the request queue" << endl;
+            logFile << "Random request with ipIn: " << randomRequest.ipIn << " ipOut: " << randomRequest.ipOut << " time: " << randomRequest.time << " has been added to the request queue" << endl;
+
         }
 
         maintainBalance();
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));  // Simulate each clock cycle as 1 second
     }
 }
 
 
     void printStatus() const {
-        // std::cout << "Load Balancer Status after " << clockCycle << " clock cycles:\n";
+        // cout << "Load Balancer Status after " << clockCycle << " clock cycles:\n";
         // for (size_t i = 0; i < webservers.size(); ++i) {
-        //     std::cout << "Webserver " << i + 1 << " is " << (webservers[i].isBusy() ? "busy\n" : "idle\n");
+        //     cout << "Webserver " << i + 1 << " is " << (webservers[i].isBusy() ? "busy\n" : "idle\n");
         // }
     }
 };

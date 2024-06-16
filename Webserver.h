@@ -2,7 +2,6 @@
 #define WEBSERVER_H
 
 #include "Request.h"
-#include <chrono>
 #include <iostream>
 
 using std::cout, std::endl;
@@ -10,21 +9,24 @@ using std::cout, std::endl;
 class Webserver {
 private:
     bool busy;
-    std::chrono::steady_clock::time_point endTime;
+    int remainingCycles;
 
 public:
-    Webserver() : busy(false) {}
+    Webserver() : busy(false), remainingCycles(0) {}
 
     bool isBusy() const { return busy; }
 
     void assignRequest(const Request& request) {
         busy = true;
-        endTime = std::chrono::steady_clock::now() + std::chrono::seconds(request.time);
+        remainingCycles = request.time;
     }
 
     void process() {
-        if (busy && std::chrono::steady_clock::now() >= endTime) {
-            busy = false;
+        if (busy) {
+            remainingCycles--;
+            if (remainingCycles <= 0) {
+                busy = false;
+            }
         }
     }
 };

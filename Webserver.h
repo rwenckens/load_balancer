@@ -4,8 +4,6 @@
 #include "Request.h"
 #include <iostream>
 
-using std::cout, std::endl;
-
 class Webserver {
 private:
     bool busy;
@@ -31,4 +29,4 @@ public:
     }
 };
 
-#endif // WEBSERVER_H
+#endif 

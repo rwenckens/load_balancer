@@ -1,9 +1,22 @@
+/**
+ * @file main.cpp
+ * @brief Entry point for the load balancer simulation program.
+ */
+
 #include <iostream>
 #include "Request.h"
 #include "Webserver.h"
 #include "RequestQueue.h"
 #include "Loadbalancer.h"
 
+/**
+ * @brief Main function to run the load balancer simulation.
+ * 
+ * The program prompts the user for various inputs, initializes the load balancer,
+ * and runs the simulation for a specified number of clock cycles.
+ * 
+ * @return int Exit status of the program.
+ */
 int main() {
     int numServers, maxClockCycles;
     bool firewallEnabled;
@@ -20,7 +33,7 @@ int main() {
     std::cin >> firewallEnabled;
 
     if (firewallEnabled) {
-        std::cout << "Max total requests by a specific ip before blocked? ";
+        std::cout << "Max total requests by a specific IP before blocked? ";
         std::cin >> maxReqByIp;
         std::cout << "Enter the number of requests to simulate an attack: ";
         std::cin >> attackRequests;
@@ -28,12 +41,14 @@ int main() {
         std::cin >> attackIP;
     }
     
-    std::cout << "Enter starting queue size (usually numServers * 100) ";
+    std::cout << "Enter starting queue size (usually numServers * 100): ";
     std::cin >> startingQueueSize;
 
     Loadbalancer loadBalancer(numServers, firewallEnabled, maxReqByIp);
     loadBalancer.generateInitialRequests(startingQueueSize);
-    loadBalancer.simulateAttack(attackRequests, attackIP);
+    if (firewallEnabled) {
+        loadBalancer.simulateAttack(attackRequests, attackIP);
+    }
     loadBalancer.run(maxClockCycles);
     loadBalancer.printStatus(numServers, startingQueueSize, maxClockCycles);
     

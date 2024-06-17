@@ -16,9 +16,6 @@
 #include "RequestQueue.h"
 #include <unordered_map>
 
-using std::cout; 
-using std::endl;
-
 /**
  * @class Loadbalancer
  * @brief A class to simulate a load balancer with DDOS protection.

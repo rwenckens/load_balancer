@@ -1,0 +1,49 @@
+/**
+ * @mainpage Load Balancer Simulation Documentation
+ *
+ * @section intro_sec Introduction
+ *
+ * This project is a simulation of a load balancer for a large company. The load balancer manages web requests, distributes them to web servers, and incorporates DDOS protection mechanisms.
+ *
+ * @section features_sec Features
+ *
+ * - Load balancer with a queue to manage incoming requests
+ * - Web server class to simulate handling requests
+ * - Request struct to represent network requests
+ * - Dynamic management of web servers based on load
+ * - DDOS protection to block IP addresses that exceed request thresholds
+ *
+ * @section components_sec Components
+ *
+ * - @ref Loadbalancer
+ * - @ref Webserver
+ * - @ref RequestQueue
+ * - @ref Request
+ *
+ * @section usage_sec Usage
+ *
+ * To compile and run the project, use the following commands:
+ *
+ * @code
+ * make && ./loadbalancer
+ * @endcode
+ *
+ * @section example_sec Example Usage
+ *
+ * Here is an example usage of the load balancer simulation:
+ *
+ * @code
+ * Enter the number of servers: 10
+ * Enter the maximum number of clock cycles to run the load balancer: 10000
+ * Enable firewall for DDOS protection? (1 for yes, 0 for no): 1
+ * Max total requests by a specific IP before blocked? 100
+ * Enter the number of requests to simulate an attack: 150
+ * Enter the IP address to simulate the attack from: 192.168.21.4
+ * Enter starting queue size (usually numServers * 100): 1000
+ * @endcode
+ *
+ * @section authors_sec Authors
+ *
+ * - Riley Wenckens (rgwenckens@tamu.edu)
+
+ */

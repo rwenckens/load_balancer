@@ -1,34 +1,45 @@
+/**
+ * @file Webserver.h
+ * @brief Header file for the Webserver class.
+ */
+
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
 
 #include "Request.h"
 #include <iostream>
 
-using std::cout, std::endl;
-
+/**
+ * @class Webserver
+ * @brief A class to simulate a web server processing network requests.
+ */
 class Webserver {
 private:
-    bool busy;
-    int remainingCycles;
+    bool busy; ///< Flag indicating if the server is busy.
+    int remainingCycles; ///< Number of clock cycles remaining to process the current request.
 
 public:
-    Webserver() : busy(false), remainingCycles(0) {}
+    /**
+     * @brief Default constructor for the Webserver class.
+     */
+    Webserver();
 
-    bool isBusy() const { return busy; }
+    /**
+     * @brief Checks if the server is busy.
+     * @return True if the server is busy, false otherwise.
+     */
+    bool isBusy() const;
 
-    void assignRequest(const Request& request) {
-        busy = true;
-        remainingCycles = request.time;
-    }
+    /**
+     * @brief Assigns a request to the server.
+     * @param request The request to be assigned.
+     */
+    void assignRequest(const Request& request);
 
-    void process() {
-        if (busy) {
-            remainingCycles--;
-            if (remainingCycles <= 0) {
-                busy = false;
-            }
-        }
-    }
+    /**
+     * @brief Processes the current request, decrementing the remaining clock cycles.
+     */
+    void process();
 };
 
-#endif // WEBSERVER_H
+#endif
